@@ -1,0 +1,109 @@
+/*
+ * Let's root the tree first at node 0,
+ * we can easily see that if the LCA of the first path (node U1, V1)
+ * and the LCA second path (node U2, V2) are not in a subtree of one another
+ * that means the answer is zero,
+ * now what if one of the lcas' a parent of the other?
+ * let's call the lca with the max depth lowLCA
+ * we can see that the paths intersect if the LCA between (U1, U2) or the LCA(U1, V2), LCA(V1, U2), LCA(V1, V2)
+ * has a less height that that of lowLCA and we can easily calculate the length of the intersection by knowing the heights
+ * of the new lcas and the one of the lowLCA
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long int ll;
+
+const int N = 1e5 + 10, MOD = 998244353, LOG = 21;
+
+int d[N], p[N][LOG + 1], n, q, l, r;
+vector<vector<int> > g(N);
+bool vis[N];
+
+void DFS(int u, int dep, int pa) {
+	vis[u] = true;
+	p[u][0] = pa;
+	d[u] = dep;
+	for (int i = 0; i < g[u].size(); i++) {
+		if (!vis[g[u][i]])
+			DFS(g[u][i], dep + 1, u);
+	}
+}
+
+int lca(int u, int v) {
+	if (d[u] < d[v])
+		swap(u, v);
+	for (int i = LOG; i >= 0; i--) {
+		if (p[u][i] != -1)
+			if (d[p[u][i]] >= d[v])
+				u = p[u][i];
+	}
+	for (int i = LOG; i >= 0; i--) {
+		if (p[u][i] != -1)
+			if (p[u][i] != p[v][i]) {
+				u = p[u][i];
+				v = p[v][i];
+			}
+	}
+	while (u != v) {
+		u = p[u][0];
+		v = p[v][0];
+	}
+	return u;
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d%d", &n, &q);
+	memset(p, -1, sizeof p);
+	for (int i = 0; i <n - 1; i++) {
+		scanf("%d%d", &l, &r);
+		l--, r--;
+		g[l].push_back(r);
+		g[r].push_back(l);
+	}
+	DFS(0, 0, -1);
+	for (int l = 1; l < LOG; l++) {
+		for (int j = 0; j < n; j++) {
+			if (p[j][l - 1] != -1)
+				p[j][l] = p[p[j][l - 1]][l - 1];
+		}
+	}
+	while (q--) {
+		int res = 0;
+		int l1, r1, l2, r2;
+		scanf("%d%d%d%d", &l1, &r1, &l2, &r2);
+		--l1, --r1, --l2, --r2;
+		int lca1 = lca(l1, r1), lca2 = lca(l2, r2);
+		if (lca(lca1, lca2) == lca1 || lca(lca1, lca2) == lca2) {
+			int ll = lca(l1, l2);
+			int lr = lca(l1, r2);
+			int rl = lca(r1, l2);
+			int rr = lca(r1, r2);
+			int mnd = max(d[lca1], d[lca2]);
+			bool mtch = false;
+			if (d[ll] >= mnd) {
+				mtch = true;
+				res += (d[ll] - mnd);
+			}
+			if (d[lr] >= mnd) {
+				mtch = true;
+				res += (d[lr] - mnd);
+			}
+			if (d[rl] >= mnd) {
+				mtch = true;
+				res += (d[rl] - mnd);
+			}
+			if (d[rr] >= mnd) {
+				mtch = true;
+				res += (d[rr] - mnd);
+			}
+			printf("%d\n", res + mtch);
+		} else {
+			printf("0\n");
+		}
+	}
+	return 0;
+}
