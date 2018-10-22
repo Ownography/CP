@@ -18,29 +18,30 @@ const int N = 1e5 + 10, MOD = 1e9 + 7, LOG = 21;
 
 int dp[101][6562], n, m;
 int st[9];
-vector<vector<int> > v;
-vector<int> temp;
+vector<int> temp, stg;
+vector<vector<int> > vg;
 vector<int> msks;
 
 int calc(int, int);
 
 void generate(int msk) {
+	stg.resize(m + 1);
 	for (int i = 0; i < m; i++) {
 		int state = msk % 3;
 		msk /= 3;
-		st[i] = state;
+		stg[i] = state;
 	}
 }
 
 void cr(int at, vector<int> cur) {
 	if (at == m) {
-		v.push_back(cur);
+		vg.push_back(cur);
 		return;
 	}
-	if (st[at] == 0) {
+	if (stg[at] == 0) {
 		cur.push_back(0);
 		cr(at + 1, cur);
-	} else if (st[at] == 1) {
+	} else if (stg[at] == 1) {
 		cur.push_back(1);
 		cr(at + 1, cur);
 	} else {
@@ -53,17 +54,29 @@ void cr(int at, vector<int> cur) {
 }
 
 int solve(int ind, int msk) {
+//	cout << msk << "**" << endl;
+	vector<vector<int> > v;
+	vector<int> st;
+	generate(msk);
+	st = stg;
+	temp.clear();
+	cr(0, temp);
+	v = vg;
+	stg.clear();
+	vg.clear();
+//	cout << msk << endl;
+//	for (int i = 0; i < m; i++) {
+//		cout << st[i] << " ";
+//	}
+//	puts("");
 	if (ind == n) {
-		cout << "yes" << endl;
 		for (int i = 0; i < m; i++) {
 			if (st[i] == 1)
 				return 0;
 		}
 		return 1;
 	}
-	v.clear();
-	temp.clear();
-	cr(0, temp);
+
 	int res = 0;
 	for (int i = 0; i < v.size(); i++) {
 		int nm = 0;
@@ -81,6 +94,8 @@ int solve(int ind, int msk) {
 				if (v[i][j + 1] == 1)
 					cur++;
 			}
+			if (st[j] != 2)
+				cur++;
 			if (cur & 1)
 				nm += pow(3, j);
 		}
@@ -94,12 +109,11 @@ int calc(int ind, int msk) {
 	int &ret = dp[ind][msk];
 	if (ret != -1)
 		return ret;
-	generate(msk);
 	return ret = solve(ind, msk);
 }
 
 int main() {
-	freopen("input.txt", "r", stdin);
+//	freopen("input.txt", "r", stdin);
 	memset(dp, -1, sizeof(dp));
 	scanf("%d%d", &n, &m);
 	int num = 0;
