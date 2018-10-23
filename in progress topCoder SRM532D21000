@@ -1,11 +1,7 @@
-/* This problem can be easily solved by binary searching the answer,
- * we can binary search on the number of musicians per stand
- * and iterate over the musicians and see if the number of stands needed is larger than the number
- * of stands we have, we can't make it happen, else we can.
- * solution runs in O(n*log(n))
- * Proof of correctness:
- * If we can put x musicians per stand (we have enough stands to make this happen) then we can put x + n per stand.
- * and vise verse, if we can't put x musicians per stands because we don't have enough stands, we can't put x - n.
+/* This problem can be solved using DP, where the states are row (1-100), and mask, the mask is in base 3 (3 states) 3^8 states,
+   state 0 -> the above node is colored and has an even number of even neighbors that are colored.
+   state 1 -> the above node is colored and has an odd number of even neighbors that are colored.
+   state 2 -> the above node is not colored.
  */
 
 #include <bits/stdc++.h>
@@ -20,6 +16,7 @@ int dp[101][6562], n, m;
 int st[9];
 vector<int> temp, stg;
 vector<vector<int> > vg;
+vector<vector<int> > mskToMsks;
 vector<int> msks;
 
 int calc(int, int);
@@ -53,53 +50,26 @@ void cr(int at, vector<int> cur) {
 	}
 }
 
+bool check(int m) {
+	while (m) {
+		int r = m % 3;
+		if (r == 1)
+			return false;
+		m /= 3;
+	}
+	return true;
+}
+
 int solve(int ind, int msk) {
-//	cout << msk << "**" << endl;
-	vector<vector<int> > v;
-	vector<int> st;
-	generate(msk);
-	st = stg;
-	temp.clear();
-	cr(0, temp);
-	v = vg;
-	stg.clear();
-	vg.clear();
-//	cout << msk << endl;
-//	for (int i = 0; i < m; i++) {
-//		cout << st[i] << " ";
-//	}
-//	puts("");
 	if (ind == n) {
-		for (int i = 0; i < m; i++) {
-			if (st[i] == 1)
-				return 0;
+		if (!check(msk)) {
+			return 0;
 		}
 		return 1;
 	}
-
 	int res = 0;
-	for (int i = 0; i < v.size(); i++) {
-		int nm = 0;
-		for (int j = 0; j < m; j++) {
-			int cur = 0;
-			if (v[i][j] == 0) {
-				nm += 2 * pow(3, j);
-				continue;
-			}
-			if (j != 0) {
-				if (v[i][j - 1] == 1)
-					cur++;
-			}
-			if (j != m - 1) {
-				if (v[i][j + 1] == 1)
-					cur++;
-			}
-			if (st[j] != 2)
-				cur++;
-			if (cur & 1)
-				nm += pow(3, j);
-		}
-		res += calc(ind + 1, nm);
+	for (int i = 0; i < mskToMsks[msk].size(); i++) {
+		res += calc(ind + 1, mskToMsks[msk][i]);
 		res %= MOD;
 	}
 	return res;
@@ -113,9 +83,38 @@ int calc(int ind, int msk) {
 }
 
 int main() {
-//	freopen("input.txt", "r", stdin);
 	memset(dp, -1, sizeof(dp));
 	scanf("%d%d", &n, &m);
+	mskToMsks.resize(6565);
+	for (int i = 0; i < 6562; i++) {
+		generate(i);
+		vg.clear();
+		temp.clear();
+		cr(0, temp);
+		for (int j = 0; j < vg.size(); j++) {
+			int nm = 0;
+			for (int k = 0; k < m; k++) {
+				int cur = 0;
+				if (vg[j][k] == 0) {
+					nm += 2 * pow(3, k);
+					continue;
+				}
+				if (k != 0) {
+					if (vg[j][k - 1] == 1)
+						cur++;
+				}
+				if (k != m - 1) {
+					if (vg[j][k + 1] == 1)
+						cur++;
+				}
+				if (stg[k] != 2)
+					cur++;
+				if (cur & 1)
+					nm += pow(3, k);
+			}
+			mskToMsks[i].push_back(nm);
+		}
+	}
 	int num = 0;
 	for (int i = 0; i < m; i++)
 		num += pow(3, i) * 2;
@@ -124,15 +123,7 @@ int main() {
 }
 
 
-/* This problem can be easily solved by binary searching the answer,
- * we can binary search on the number of musicians per stand
- * and iterate over the musicians and see if the number of stands needed is larger than the number
- * of stands we have, we can't make it happen, else we can.
- * solution runs in O(n*log(n))
- * Proof of correctness:
- * If we can put x musicians per stand (we have enough stands to make this happen) then we can put x + n per stand.
- * and vise verse, if we can't put x musicians per stands because we don't have enough stands, we can't put x - n.
- */
+//TOPCODER SUBMISSION!!!
 
 #include <bits/stdc++.h>
 
@@ -144,21 +135,62 @@ const int N = 1e5 + 10, MOD = 1e9 + 7, LOG = 21;
 
 int dp[101][6562], n, m;
 int st[9];
-vector<bool> temp;
-vector<vector<bool> > vg;
-vector<int> msks, stg;
+vector<int> temp, stg;
+vector<vector<int> > vg;
+vector<vector<int> > mskToMsks;
+vector<int> msks;
 
 class DengklekPaintingSquares {
 public:
 	int numSolutions(int N, int M) {
 		n = N, m = M;
-		if (n == 1 && m == 1)
-			memset(dp, -1, sizeof(dp));
+		memset(dp, -1, sizeof(dp));
+		mskToMsks.resize(6565);
+		for (int i = 0; i < 6562; i++) {
+			generate(i);
+			vg.clear();
+			temp.clear();
+			cr(0, temp);
+			for (int j = 0; j < vg.size(); j++) {
+				int nm = 0;
+				for (int k = 0; k < m; k++) {
+					int cur = 0;
+					if (vg[j][k] == 0) {
+						nm += 2 * pow(3, k);
+						continue;
+					}
+					if (k != 0) {
+						if (vg[j][k - 1] == 1)
+							cur++;
+					}
+					if (k != m - 1) {
+						if (vg[j][k + 1] == 1)
+							cur++;
+					}
+					if (stg[k] != 2)
+						cur++;
+					if (cur & 1)
+						nm += pow(3, k);
+				}
+				mskToMsks[i].push_back(nm);
+			}
+		}
 		int num = 0;
 		for (int i = 0; i < m; i++)
 			num += pow(3, i) * 2;
 		return calc(0, num);
 	}
+
+	bool check(int m) {
+		while (m) {
+			int r = m % 3;
+			if (r == 1)
+				return false;
+			m /= 3;
+		}
+		return true;
+	}
+
 	void generate(int msk) {
 		stg.resize(m + 1);
 		for (int i = 0; i < m; i++) {
@@ -168,7 +200,7 @@ public:
 		}
 	}
 
-	void cr(int at, vector<bool> cur) {
+	void cr(int at, vector<int> cur) {
 		if (at == m) {
 			vg.push_back(cur);
 			return;
@@ -189,46 +221,15 @@ public:
 	}
 
 	int solve(int ind, int msk) {
-		//	cout << msk << "**" << endl;
-		vector<vector<bool> > v;
-		vector<int> st;
-		generate(msk);
-		st = stg;
-		temp.clear();
-		cr(0, temp);
-		v = vg;
-		vg.clear();
 		if (ind == n) {
-			for (int i = 0; i < m; i++) {
-				if (st[i] == 1)
-					return 0;
+			if (!check(msk)) {
+				return 0;
 			}
 			return 1;
 		}
-
 		int res = 0;
-		for (int i = 0; i < v.size(); i++) {
-			int nm = 0;
-			for (int j = 0; j < m; j++) {
-				int cur = 0;
-				if (v[i][j] == 0) {
-					nm += 2 * pow(3, j);
-					continue;
-				}
-				if (j != 0) {
-					if (v[i][j - 1] == 1)
-						cur++;
-				}
-				if (j != m - 1) {
-					if (v[i][j + 1] == 1)
-						cur++;
-				}
-				if (st[j] != 2)
-					cur++;
-				if (cur & 1)
-					nm += pow(3, j);
-			}
-			res += calc(ind + 1, nm);
+		for (int i = 0; i < mskToMsks[msk].size(); i++) {
+			res += calc(ind + 1, mskToMsks[msk][i]);
 			res %= MOD;
 		}
 		return res;
