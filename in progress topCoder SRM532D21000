@@ -122,3 +122,122 @@ int main() {
 	cout << calc(0, num);
 	return 0;
 }
+
+
+/* This problem can be easily solved by binary searching the answer,
+ * we can binary search on the number of musicians per stand
+ * and iterate over the musicians and see if the number of stands needed is larger than the number
+ * of stands we have, we can't make it happen, else we can.
+ * solution runs in O(n*log(n))
+ * Proof of correctness:
+ * If we can put x musicians per stand (we have enough stands to make this happen) then we can put x + n per stand.
+ * and vise verse, if we can't put x musicians per stands because we don't have enough stands, we can't put x - n.
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long int ll;
+
+const int N = 1e5 + 10, MOD = 1e9 + 7, LOG = 21;
+
+int dp[101][6562], n, m;
+int st[9];
+vector<bool> temp;
+vector<vector<bool> > vg;
+vector<int> msks, stg;
+
+class DengklekPaintingSquares {
+public:
+	int numSolutions(int N, int M) {
+		n = N, m = M;
+		if (n == 1 && m == 1)
+			memset(dp, -1, sizeof(dp));
+		int num = 0;
+		for (int i = 0; i < m; i++)
+			num += pow(3, i) * 2;
+		return calc(0, num);
+	}
+	void generate(int msk) {
+		stg.resize(m + 1);
+		for (int i = 0; i < m; i++) {
+			int state = msk % 3;
+			msk /= 3;
+			stg[i] = state;
+		}
+	}
+
+	void cr(int at, vector<bool> cur) {
+		if (at == m) {
+			vg.push_back(cur);
+			return;
+		}
+		if (stg[at] == 0) {
+			cur.push_back(0);
+			cr(at + 1, cur);
+		} else if (stg[at] == 1) {
+			cur.push_back(1);
+			cr(at + 1, cur);
+		} else {
+			cur.push_back(0);
+			cr(at + 1, cur);
+			cur.pop_back();
+			cur.push_back(1);
+			cr(at + 1, cur);
+		}
+	}
+
+	int solve(int ind, int msk) {
+		//	cout << msk << "**" << endl;
+		vector<vector<bool> > v;
+		vector<int> st;
+		generate(msk);
+		st = stg;
+		temp.clear();
+		cr(0, temp);
+		v = vg;
+		vg.clear();
+		if (ind == n) {
+			for (int i = 0; i < m; i++) {
+				if (st[i] == 1)
+					return 0;
+			}
+			return 1;
+		}
+
+		int res = 0;
+		for (int i = 0; i < v.size(); i++) {
+			int nm = 0;
+			for (int j = 0; j < m; j++) {
+				int cur = 0;
+				if (v[i][j] == 0) {
+					nm += 2 * pow(3, j);
+					continue;
+				}
+				if (j != 0) {
+					if (v[i][j - 1] == 1)
+						cur++;
+				}
+				if (j != m - 1) {
+					if (v[i][j + 1] == 1)
+						cur++;
+				}
+				if (st[j] != 2)
+					cur++;
+				if (cur & 1)
+					nm += pow(3, j);
+			}
+			res += calc(ind + 1, nm);
+			res %= MOD;
+		}
+		return res;
+	}
+
+	int calc(int ind, int msk) {
+		int &ret = dp[ind][msk];
+		if (ret != -1)
+			return ret;
+		return ret = solve(ind, msk);
+	}
+};
