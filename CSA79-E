@@ -1,0 +1,54 @@
+/* the idea is to make all values of the same sign (positive)
+ * and then apply the algorithm for picking the first k smallest subset sums
+ * (I couldn't find a proof of correctness for it)
+ * but here are the links I used
+ * https://math.stackexchange.com/questions/1506675/k-th-subset-in-order-of-increasing-sum
+ *	https://stackoverflow.com/questions/33219712/find-k-th-minimum-sum-of-every-possible-subset
+ *
+ */
+
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long int ll;
+
+const int N = 1e5 + 10, MOD = 1e9 + 7, LOG = 21;
+
+priority_queue<pair<ll, int> > q;
+ll n, m, res, a[N], neg;
+bool f = false;
+
+int main() {
+	scanf("%lld%lld", &n, &m);
+	for (int i = 0; i < n; i++) {
+		scanf("%lld", a + i);
+		if (a[i] < 0) {
+			neg += a[i];
+			a[i] *= -1;
+		}
+	}
+	sort(a, a + n);
+	if (res < 0) {
+		f = true;
+	}
+	q.push(make_pair(a[0] * -1, 0));
+	printf("%lld\n", neg);
+	m--;
+	while (m--) {
+		ll ss = q.top().first;
+		int ind = q.top().second;
+		res = neg - ss;
+		printf("%lld\n", res);
+		q.pop();
+		if (ind != n - 1) {
+			ss += a[ind];
+			ss -= a[ind + 1];
+			q.push(make_pair(ss, ind + 1));
+			ss -= a[ind];
+			q.push(make_pair(ss, ind + 1));
+		}
+	}
+	return 0;
+}
