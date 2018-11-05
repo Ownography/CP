@@ -1,10 +1,6 @@
-/*First observation is that little numbers should be summed up to go to above 3
- * any number above 3 is better multiplied
- * also given a set of numbers to add, the best pairs to pick are least with most since we will multiply them next
- * also if the number of numbers we are going to add is N
- * then the numbers we will add are the first N numbers given that the array is sorted
- * so we just bruteforce on N
- *
+/*
+* we first check the segments that once were on, and remove any impossible patterns for a given light, then we loop through them and determine if a segment that has never been on, is broken or not.
+*
  */
 
 #include <bits/stdc++.h>
