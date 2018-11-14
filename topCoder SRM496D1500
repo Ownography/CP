@@ -1,0 +1,168 @@
+/*	The idea is to try all possible "Distances" travelled, they are 50 at most.
+ *	After trying a certain travelled distance, to see in how many ways this could happen, we can make a bipartite graph
+ *	where a part contains the firstPicture nodes, and the secondPart contains the secondPicture nodes
+ *	We can easily detect a pattern in the graph to see in how many ways we can choose the nodes depending on the
+ *	graph we get.
+ * */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long int ll;
+vector<int> f, s, dist;
+int n, m, temp;
+set<int> viss[2], nodes[2], hv;
+
+int calc(int node, int state, int distance) {
+	viss[state].insert(node);
+	if (nodes[!state].find(node + distance) != nodes[!state].end()
+			&& viss[!state].find(node + distance) == viss[!state].end()) {
+		return 1 + calc(node + distance, !state, distance);
+	}
+	return 1;
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		scanf("%d", &temp);
+		f.push_back(temp);
+		nodes[0].insert(temp);
+	}
+	scanf("%d", &m);
+	for (int i = 0; i < m; i++) {
+		scanf("%d", &temp);
+		s.push_back(temp);
+		nodes[1].insert(temp);
+	}
+	sort(f.begin(), f.end());
+	sort(s.begin(), s.end());
+	for (int i = 0; i < m; i++) {
+		int d = abs(f[0] - s[i]);
+		if (d == 0 || hv.find(d) != hv.end())
+			continue;
+		hv.insert(d);
+		dist.push_back(d);
+	}
+	long long int res = 0;
+	for (int i = 0; i < dist.size(); i++) {
+		ll tres = 1;
+		viss[0].clear();
+		viss[1].clear();
+		for (int j = 0, k = 0; j < n || k < m;) {
+			int node, state;
+			if (f[j] <= s[k] && j < n && k < m) {
+				node = f[j];
+				state = 0;
+				j++;
+			} else if (f[j] > s[k] && j < n && k < m) {
+				node = s[k];
+				state = 1;
+				k++;
+			} else if (j < n) {
+				node = f[j];
+				state = 0;
+				j++;
+			} else {
+				node = s[k];
+				state = 1;
+				k++;
+			}
+			if (viss[state].find(node) == viss[state].end()) {
+				int can = calc(node, state, dist[i]);
+				if (!state) {
+					tres *= !(can & 1);
+				} else {
+					if (can % 2 == 0) {
+						tres *= 1;
+					} else {
+						tres *= (can >> 1) + 1;
+					}
+				}
+			}
+		}
+		res += tres;
+	}
+	cout << res;
+	return 0;
+}
+
+// TopCoder Submission
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long int ll;
+vector<int> f, s, dist;
+int n, m, temp;
+set<int> viss[2], nodes[2], hv;
+
+class OneDimensionalBalls {
+public:
+	long long countValidGuesses(vector<int> A, vector<int> B) {
+		n = A.size();
+		for (int i = 0; i < n; i++) {
+			temp = A[i];
+			f.push_back(temp);
+			nodes[0].insert(temp);
+		}
+		m = B.size();
+		for (int i = 0; i < m; i++) {
+			temp = B[i];
+			s.push_back(temp);
+			nodes[1].insert(temp);
+		}
+		sort(f.begin(), f.end());
+		sort(s.begin(), s.end());
+		for (int i = 0; i < m; i++) {
+			int d = abs(f[0] - s[i]);
+			if (d == 0 || hv.find(d) != hv.end())
+				continue;
+			hv.insert(d);
+			dist.push_back(d);
+		}
+		long long int res = 0;
+		for (int i = 0; i < dist.size(); i++) {
+			ll tres = 1;
+			viss[0].clear();
+			viss[1].clear();
+			for (int j = 0, k = 0; j < n || k < m;) {
+				int node, state;
+				if (f[j] <= s[k] && j < n && k < m) {
+					node = f[j];
+					state = 0;
+					j++;
+				} else if (f[j] > s[k] && j < n && k < m) {
+					node = s[k];
+					state = 1;
+					k++;
+				} else if (j < n) {
+					node = f[j];
+					state = 0;
+					j++;
+				} else {
+					node = s[k];
+					state = 1;
+					k++;
+				}
+				if (viss[state].find(node) == viss[state].end()) {
+					int can = calc(node, state, dist[i]);
+					if (!state) {
+						tres *= !(can & 1);
+					} else {
+						if (can % 2 == 0) {
+							tres *= 1;
+						} else {
+							tres *= (can >> 1) + 1;
+						}
+					}
+				}
+			}
+			res += tres;
+		}
+		return res;
+	}
+}
