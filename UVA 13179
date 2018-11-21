@@ -1,9 +1,20 @@
-// Solution 1
 
-/* The idea is to do a binary search on answer for each state
- * This obviously is TLE, therefore we use a technique called parallel binary search
- *
+/*  This is a DP problem, can be solved in 2 ways, with the right optimization you can pass the time with DP[100][100][100][100]
+* what this represents is that where is the last moving rat, where the other rat is, and any extra time the first rat has, 
+* and any extra time the second rat has. And the DP represents the minimum cost.
+*
+* Obviously this can be trimmed down to DP[100][100][100] since we only care about the time the other rat has, and we use that 
+* when we transistion between rats only. Making the solution pass in 0.010s
+*
+*
  * */
+
+
+
+
+
+
+// Solution 1
 
 #include <bits/stdc++.h>
 
@@ -70,11 +81,6 @@ int main() {
 
 //Solution 2
 
-/* The idea is to do a binary search on answer for each state
- * This obviously is TLE, therefore we use a technique called parallel binary search
- *
- * */
-
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -123,3 +129,64 @@ int main() {
 	}
 	return 0;
 }
+
+//SOLUTION 3 (BEST TIME)
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long int ll;
+const int N = 105, MOD = 1e9 + 7;
+
+int r, c, cnt, xi, yi, dp[N][N][N];
+pair<int, int> q[N];
+vector<pair<pair<int, int>, int> > states;
+
+int dist(int xx1, int yy1, int xx2, int yy2) {
+	return abs(xx1 - xx2) + abs(yy1 - yy2);
+}
+
+int calc(int ind, int spind, int extra) {
+	extra = min(extra, 100);
+	states.push_back(make_pair(make_pair(ind, spind), extra));
+	if (ind == cnt + 1) {
+		return max(
+				(dist(q[spind].first, q[spind].second, r - 1, c - 1) - extra),
+				0);
+	}
+	int &ret = dp[ind][spind][extra];
+	if (ret != -1)
+		return ret;
+	int toAdd = dist(q[ind].first, q[ind].second, q[ind + 1].first,
+			q[ind + 1].second);
+	int toAdd2 = dist(q[spind].first, q[spind].second, q[ind + 1].first,
+			q[ind + 1].second);
+	int toRemove2 = min(toAdd2, extra);
+	toAdd2 -= toRemove2;
+	return ret = min(toAdd + calc(ind + 1, spind, extra + toAdd),
+			toAdd2 + calc(ind + 1, ind, toAdd2));
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	memset(dp, -1, sizeof dp);
+	while (scanf("%d%d", &r, &c) == 2) {
+		while (!states.empty()) {
+			int v1 = states.back().first.first;
+			int v2 = states.back().first.second;
+			int v3 = states.back().second;
+			dp[v1][v2][v3] = -1;
+			states.pop_back();
+		}
+		scanf("%d", &cnt);
+		for (int i = 1; i <= cnt; i++) {
+			scanf("%d%d", &q[i].first, &q[i].second);
+			q[i].first--, q[i].second--;
+		}
+		q[cnt + 1] = make_pair(r - 1, c - 1);
+		printf("%d\n", calc(0, 0, 0) + 1);
+	}
+	return 0;
+}
+
