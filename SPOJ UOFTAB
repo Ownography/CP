@@ -1,0 +1,59 @@
+/*A very simple solution is dp, or BFS where the state is where each fox is in his cycle, solution in O(24^4 * 4)
+ *
+ *
+ *
+ *
+ * */
+
+
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long int ll;
+
+#define oo 1e9
+
+const int N = 5, M = 25;
+
+int t, n, cyc[N], a[N], s[N], res;
+bool vis[M][M][M][M];
+
+bool check(int time) {
+	if (vis[cyc[0]][cyc[1]][cyc[2]][cyc[3]])
+		return false;
+	vis[cyc[0]][cyc[1]][cyc[2]][cyc[3]] = true;
+	for (int i = 0; i < n; i++) {
+		if (cyc[i] < a[i])
+			return true;
+	}
+	res = min(res, time);
+	return true;
+
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &t);
+	while (t--) {
+		memset(cyc, 0, sizeof(cyc));
+		memset(vis, false, sizeof(vis));
+		res = oo;
+		scanf("%d", &n);
+		for (int i = 0; i < n; i++) {
+			scanf("%d%d%d", &a[i], &s[i], &cyc[i]);
+		}
+		for (int i = 0; i < oo; i++) {
+			if (!check(i))
+				break;
+			for (int i = 0; i < n; i++) {
+				cyc[i]++;
+				cyc[i] %= (a[i] + s[i]);
+			}
+		}
+		if (res != oo)
+			printf("%d\n", res);
+		else
+			puts("Foxen are too powerful");
+	}
+	return 0;
+}
