@@ -1,0 +1,113 @@
+/*	
+* The idea is a straight forward dp on siblings once you connect the forest using one root with infinite cost
+, where the dp[node][cnt] represents the minimum cost of getting cnt votes from the node's subtree.
+* Then it's a matter of parsing the input.
+*
+ *
+ * */
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 1e3 + 10;
+int n, m, cnt = 1, prevvRoot = -1, cost[N], prevv[N];
+char c[N];
+bool vis[N];
+string s;
+vector<int> v;
+vector<string> vs;
+vector<vector<int> > g(N);
+map<string, int> stoii;
+map<int, string> itos;
+int p[N], dp[N][N], sz[N];
+string toAdd;
+bool f;
+
+void DFS(int node) {
+	vis[node] = true;
+	for (int i = 0; i < g[node].size(); i++)
+		DFS(g[node][i]);
+}
+
+void calc(int node) {
+	prevv[0] = 0;
+	dp[node][0] = 0;
+	for (int i = 1; i < N; i++) {
+		prevv[i] = dp[node][i] = 1e9;
+	}
+	for (int i = 0; i < g[node].size(); i++) {
+		calc(g[node][i]);
+		for (int t = 0; t <= sz[node] + sz[g[node][i]]; t++)
+			prevv[t] = dp[node][t];
+		for (int k = 0; k <= sz[node]; k++) {
+			for (int kk = 0; kk <= sz[g[node][i]]; kk++) {
+				dp[node][k + kk] = min(dp[node][k + kk],
+						prevv[k] + dp[g[node][i]][kk]);
+			}
+		}
+		sz[node] += sz[g[node][i]];
+	}
+	sz[node]++;
+	dp[node][sz[node]] = cost[node];
+}
+void ParseLine(const string &line) {
+	stringstream ss(line);
+
+	string country;
+	ss >> country;
+	if (stoii[country] == 0)
+		stoii[country] = cnt++;
+	int ind = stoii[country];
+	int ind2 = ind;
+	ss >> cost[ind];
+	while (ss >> country) {
+		if (stoii[country] == 0)
+			stoii[country] = cnt++;
+		ind = stoii[country];
+		g[ind2].push_back(ind);
+		p[ind] = ind2;
+	}
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	while (cin.peek() != '#') {
+		memset(p, -1, sizeof p);
+		memset(vis, 0, sizeof vis);
+		memset(sz, 0, sizeof sz);
+		vs.clear();
+		cnt = 1;
+		stoii.clear();
+		itos.clear();
+		g.clear();
+		g.resize(N);
+		cin >> n >> m;
+		cin.ignore();
+		for (int i = 0; i < n; i++) {
+			string line;
+			getline(cin, line);
+			ParseLine(line);
+		}
+		for (int i = 1; i <= n; i++) {
+			if (!vis[i]) {
+				int r = i;
+				while (p[i] != -1) {
+					r = p[i];
+					p[i] = p[p[i]];
+				}
+				DFS(r);
+				g[0].push_back(r);
+			}
+		}
+		cost[0] = 1e9;
+		calc(0);
+		int res = 1e9;
+		for (int i = m; i <= n; i++) {
+			res = min(res, dp[0][i]);
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}
