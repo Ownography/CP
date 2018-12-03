@@ -1,0 +1,86 @@
+/* The main idea is that for a number to have its sum of divisors be a power of 2 it must be the product of distinct Mersenne primes
+ * Mersenne primes are primes that are written as (2 ^ x - 1)
+ * also the sum of divisors is multiplicative if:
+ * x = a * b * c ...
+ * if (a,b,c) are pairwise coprime then
+ * sum of divisors = segma
+ * segma(x) = segma(a) * segma(b) * segma(c)...
+ * the rest is simple DP to know which number to pick or not
+ * also you won't need e(i) to be anything other than 0 or 1 since otherwise it will not be a prime.
+ * */
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 1e2 + 10;
+int n, k, temp, res;
+ll a[N];
+ll dp[N][(int) (1 << 10)];
+map<ll, int> mp;
+bool can;
+vector<ll> mer;
+
+bool isPrime(ll num) {
+	if (num == 1 || num == 0)
+		return false;
+	for (ll i = 2; i * i <= num; i++) {
+		if (num % i == 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+ll calc(int ind, ll msk) {
+	if (ind == k)
+		return 0;
+	if (dp[ind][msk] != -1)
+		return dp[ind][msk];
+	ll nm = 0, add = 0;
+	ll Temp = a[ind];
+	for (int i = 0; i < mer.size(); i++) {
+//		cout << mer[i] << endl;
+		int cnt = 0;
+		while (Temp % mer[i] == 0) {
+			Temp /= mer[i];
+			cnt++;
+		}
+		if (cnt > 1) {
+			return dp[ind][msk] = calc(ind + 1, msk);
+		}
+		if (cnt == 1) {
+			nm |= (1 << i);
+			add += mp[mer[i]];
+		}
+	}
+	if (!(msk & nm) && Temp == 1) {
+		return dp[ind][msk] = max(1LL * calc(ind + 1, msk),
+				add + calc(ind + 1, msk | nm));
+	} else
+		return dp[ind][msk] = calc(ind + 1, msk);
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	for (int i = 0; i <= 31; i++) {
+		if (isPrime((1LL << i) - 1)) {
+			mp[(1LL << i) - 1] = i;
+			mer.push_back((1LL << i) - 1);
+		}
+	}
+	while (~scanf("%d", &k)) {
+		memset(dp, -1, sizeof dp);
+		res = 0;
+		for (int i = 0; i < k; i++) {
+			scanf("%lld", a + i);
+		}
+		res = calc(0, 0);
+		if (!res)
+			printf("NO\n");
+		else
+			printf("%d\n", res);
+	}
+	return 0;
+}
