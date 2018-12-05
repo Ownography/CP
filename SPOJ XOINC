@@ -1,0 +1,50 @@
+/* The idea is to calculate the max value we can get using the i-th player in a dp fashion
+ * however in each state you will try to do 2 * (prevTake) moves making the solution O(n*n*n(
+ * This can be avoided by calling the dp backwards to insure that any index beyond you is solved
+ * and make a min and max array since the first will maximize and second will minimize
+ * making the solution O(n * n)
+ * */
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 2e3 + 2;
+
+int dp[N][N][2], mn[N][N], mx[N][N], n, a[N], cs[N];
+
+int calc(int ind, int toTake, int state) {
+	if (state) {
+		if (ind + toTake <= n)
+			return dp[ind][toTake][state] = mx[ind + toTake][min(
+					min((n - ind - toTake), 2000), 2 * toTake)];
+	} else {
+		if (ind + toTake <= n)
+			return dp[ind][toTake][state] = cs[ind + toTake] - cs[ind]
+					+ mn[ind + toTake][min(min((n - ind - toTake), 2000),
+							2 * toTake)];
+	}
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		scanf("%d", a + i);
+		cs[i + 1] = cs[i] + a[i];
+	}
+	for (int i = n - 1; i >= 0; i--) {
+		for (int to = 1; to <= 2000 && to + i <= n; to++) {
+			calc(i, to, 0);
+			calc(i, to, 1);
+		}
+		mn[i][0] = 1e9;
+		for (int to = 1; to <= 2000 && to + i <= n; to++) {
+			mn[i][to] = min(dp[i][to][1], mn[i][to - 1]);
+			mx[i][to] = max(dp[i][to][0], mx[i][to - 1]);
+		}
+	}
+	cout << max(dp[0][1][0], dp[0][2][0]) << endl;
+	return 0;
+}
