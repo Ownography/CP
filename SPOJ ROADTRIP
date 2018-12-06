@@ -1,0 +1,73 @@
+/* The idea is to keep with you what amount of fuel you have and from which station for every step
+ * Then at every station try replace the most expensive fuel you have with the one you can buy
+ * until you fill your tank.
+ * and when you have to pay (move along the path), try paying first from the cheapest fuel you have.
+ * Solution runs in O(n * log n)
+ * */
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 5e5 + 2;
+
+int testCases, n, c, a[N], d[N], p[N], cur, ind;
+multiset<pair<int, pair<int, int> > > p_to_count;
+multiset<pair<int, pair<int, int> > >::iterator it;
+multiset<pair<int, pair<int, int> > >::reverse_iterator rit;
+ll fres;
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &testCases);
+	while (testCases--) {
+		cur = 0;
+		ind = 1;
+		fres = 0;
+		p_to_count.clear();
+		scanf("%d%d", &n, &c);
+		for (int i = 1; i <= n; i++) {
+			scanf("%d", a + i);
+			d[i - 1] = a[i] - a[i - 1];
+		}
+		for (int i = 0; i < n; i++) {
+			scanf("%d", p + i);
+		}
+		for (int i = 0; i < n; i++) {
+			for (rit = p_to_count.rbegin(); rit != p_to_count.rend();) {
+				pair<int, pair<int, int> > node = *rit;
+				if (node.first <= p[i])
+					break;
+				else {
+					rit++;
+					cur -= node.second.first;
+					p_to_count.erase(p_to_count.find(node));
+				}
+			}
+			p_to_count.insert(make_pair(p[i], make_pair(c - cur, ind++)));
+			int needed = d[i];
+			cur = c;
+			for (it = p_to_count.begin(); it != p_to_count.end();) {
+				pair<int, pair<int, int> > node = *it;
+				if (needed >= node.second.first) {
+					needed -= node.second.first;
+					fres += 1LL * (node.second.first) * node.first;
+					it++;
+					p_to_count.erase(p_to_count.find(node));
+				} else {
+					fres += 1LL * needed * node.first;
+					p_to_count.insert(
+							make_pair(node.first,
+									make_pair(node.second.first - needed,
+											ind++)));
+					p_to_count.erase(p_to_count.find(node));
+					break;
+				}
+			}
+			cur -= d[i];
+		}
+		cout << fres << endl;
+	}
+	return 0;
+}
