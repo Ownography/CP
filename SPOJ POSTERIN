@@ -1,0 +1,45 @@
+/*	The idea is that everytime the height increases we have to add a poster
+ * 	and whenever the height decreases, we add a poster iff there is no previous height of the same height or the height that equals me has another height that's lower than us in between us
+ * 	this is a common stack problem
+ * */
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 5e5 + 2;
+
+int n, d[N], res, h[N];
+stack<int> s;
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		scanf("%d%d", d + i, h + i);
+		if (s.empty()) {
+			res++;
+			s.push(h[i]);
+		} else {
+			while (s.top() > h[i]) {
+				s.pop();
+				if (s.empty())
+					break;
+			}
+			if (s.empty()) {
+				res++;
+				s.push(h[i]);
+			} else {
+				if (s.top() == h[i])
+					continue;
+				else {
+					res++;
+					s.push(h[i]);
+				}
+			}
+		}
+	}
+	cout << res;
+	return 0;
+}
