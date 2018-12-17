@@ -1,0 +1,89 @@
+/*	The idea is to calculate for everynode in the tree the number of possible subtrees having it as root.
+ *  (number of subsets of nodes having it as the LCA)
+ *	this can be done by dynamic programmming and for each node, dp[node] is looping through the dp of its children
+ *	+ 1 for the possibility of not taking this child.
+ *  Then we loop through the dp of all nodes and sum them up to include all possible subtrees.
+ * */
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 1e2 + 2, MOD = 1e9 + 7;
+
+ll dp[N];
+int n;
+vector<int> a, b;
+vector<vector<int> > g(N);
+
+int calc(int node, int p) {
+	dp[node] = 1;
+	for (int i = 0; i < g[node].size(); i++) {
+		if (g[node][i] == p)
+			continue;
+		calc(g[node][i], node);
+		dp[node] *= dp[g[node][i]] + 1;
+		dp[node] %= MOD;
+	}
+	return dp[node];
+}
+int main() {
+	freopen("input.txt", "r", stdin);
+	g.resize(N);
+	for (int i = 1; i <= 9; i++) {
+		a.push_back(i);
+		b.push_back(i + 1);
+	}
+	n = a.size() + 1;
+	for (int i = 0; i < n - 1; i++) {
+		g[a[i] - 1].push_back(b[i] - 1);
+		g[b[i] - 1].push_back(a[i] - 1);
+	}
+	calc(0, -1);
+	ll val = 0;
+	for (int i = 0; i < n; i++)
+		val += dp[i];
+	cout << val + 1 << endl;
+	return 0;
+}
+// Submission
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 1e2 + 2, MOD = 1e9 + 7;
+
+ll dp[N];
+int n;
+vector<int> a, b;
+vector<vector<int> > g(N);
+
+class CentaurCompanyDiv2 {
+public:
+	ll calc(int node, int p) {
+		dp[node] = 1;
+		for (int i = 0; i < g[node].size(); i++) {
+			if (g[node][i] == p)
+				continue;
+			calc(g[node][i], node);
+			dp[node] *= dp[g[node][i]] + 1;
+		}
+		return dp[node];
+	}
+	ll count(vector<int> a, vector<int> b) {
+		g.resize(N);
+		n = a.size() + 1;
+		for (int i = 0; i < n - 1; i++) {
+			g[a[i] - 1].push_back(b[i] - 1);
+			g[b[i] - 1].push_back(a[i] - 1);
+		}
+		calc(0, -1);
+		ll val = 0;
+		for (int i = 0; i < n; i++)
+			val += dp[i];
+		return val + 1;
+	}
+};
