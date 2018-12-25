@@ -1,0 +1,79 @@
+/* The main idea is that the gcd decreases at most, almost O(log n) steps.
+ * So for every index, we binary search for every decrease the longest distace, this means O(log n) for every step
+ * This leaves us at O(log n * log n * n) by using sparse table.
+ * */
+
+#include <bits/stdc++.h>
+
+typedef long long int ll;
+
+using namespace std;
+
+const int N = 1e5 + 1, LOG = 18;
+
+ll sp[N][LOG], a[N];
+int t, n, LOG2[N];
+ll fans = -1;
+
+void setup() {
+	for (int i = 0; i < N; i++) {
+		LOG2[i] = log2(i);
+	}
+}
+
+ll build() {
+	for (int i = 0; i < n; ++i) {
+		sp[i][0] = a[i];
+	}
+	for (int j = 1; j < LOG; ++j)
+		for (int i = 0; i + (1 << j) <= n; ++i)
+			sp[i][j] = __gcd(sp[i][j - 1], sp[i + (1 << (j - 1))][j - 1]);
+}
+
+ll query(int i, int len) {
+	int x = LOG2[len];
+	int x2 = 1 << x;
+	int stand = len - x2;
+	return __gcd(sp[i][x], sp[i + stand][x]);
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &t);
+	setup();
+	while (t--) {
+		fans = -1;
+		scanf("%d", &n);
+		for (int i = 0; i < n; ++i)
+			scanf("%lld", a + i);
+		build();
+		for (int i = 0; i < n; ++i) {
+			ll curGcd = a[i], tGcd;
+			int at = 0;
+			int prev = 1;
+			while (at != -1) {
+				int l = prev, r = (n - i);
+				at = -1;
+				while (l <= r) {
+					int mid = (l + r) >> 1;
+					ll res = query(i, mid);
+					if (res < curGcd) {
+						r = mid - 1;
+						at = mid;
+						prev = mid;
+						tGcd = res;
+					} else {
+						l = mid + 1;
+					}
+				}
+				if (at == -1) {
+					fans = max(fans, curGcd * (n - i));
+				}
+				fans = max(fans, curGcd * (at - 1));
+				curGcd = tGcd;
+			}
+		}
+		printf("%lld\n", fans);
+	}
+	return 0;
+}
