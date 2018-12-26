@@ -1,0 +1,44 @@
+//https://www.hackerrank.com/contests/world-codesprint-13/challenges/balanced-sequence
+/* The idea is that all unbalanced bracket sequences are of 3 forms:
+ * ..)..)...(..(..
+ * ..(..(..(..(
+ * ..)..)..)..)
+ * And it's easy to see why the first needs 2 operations
+ * and the last 2 need one.
+ * */
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 1e6 + 10;
+
+char arr[N];
+bool was;
+int n, sum;
+
+int main() {
+	scanf("%d%s", &n, &arr);
+	for (int i = 0; i < n; i++) {
+		if (arr[i] == '(') {
+			sum++;
+		} else {
+			sum--;
+		}
+		if (sum < 0) {
+			was = true;
+			sum = 0;
+		}
+	}
+	if (was && sum) {
+		printf("%d", 2);
+	} else if (was)
+		printf("%d", 1);
+	else if (sum)
+		printf("%d", 1);
+	else
+		printf("0");
+	return 0;
+}
