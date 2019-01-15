@@ -1,0 +1,132 @@
+/ *
+*  The idea is to first know how many digits the solution will be, by loopniug the the digits, and seeing how many palindromes are in
+* each digit, and then we set the res as 100..001
+* Then start adding to each digit until we reach the kth palindrome
+*
+*
+*
+ * */
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 2e5 + 10, MOD = 998244353, M = 1e8 + 2;
+
+int n;
+
+//ll check(int i) {
+//	ll ret = 1;
+//	if (i == 1)
+//		return 9;
+//	if (i & 1) {
+//		ret *= 10;
+//		--i;
+//		i /= 2;
+//		ret *= 9;
+//		i--;
+//		ret *= pow(10, i);
+//	} else {
+//		i /= 2;
+//		ret *= 9;
+//		i--;
+//		ret *= pow(10, i);
+//	}
+//	return ret;
+//}
+//
+//int main() {
+//	scanf("%d", &n);
+//	string s = "";
+//	for (int i = 1; i <= 18; i++) {
+//		if (check(i) <= n) {
+//			n -= check(i);
+//		} else {
+//			int dig = i / 2;
+//			if (i & 1)
+//				dig++;
+//			int ind = 0;
+//			s += '1';
+//			for (int i = 0; i < dig - 1; i++)
+//				s += '0';
+//			while (n > 0) {
+//				if (s[ind] == '9') {
+//					ind++;
+//				} else if (n - pow(10, dig - (ind + 1)) >= 0) {
+//					s[ind]++;
+//					n -= pow(10, dig - (ind + 1));
+//				} else {
+//					ind++;
+//				}
+//			}
+//			int xx = (i & 1);
+//			for (int i = s.size() - 1 - xx; i >= 0; i--)
+//				s += s[i];
+//			cout << s << endl;
+//			return 0;
+//		}
+//	}
+//	return 0;
+//}
+
+class IntegerPalindrome {
+public:
+	long long findByIndex(int n) {
+		string s = "";
+		for (int i = 1; i <= 18; i++) {
+			if (check(i) <= n) {
+				n -= check(i);
+			} else {
+				int dig = i / 2;
+				if (i & 1)
+					dig++;
+				int ind = 0;
+				s += '1';
+				for (int i = 0; i < dig - 1; i++)
+					s += '0';
+				while (n > 0) {
+					if (s[ind] == '9') {
+						ind++;
+					} else if (n - pow(10, dig - (ind + 1)) >= 0) {
+						s[ind]++;
+						n -= pow(10, dig - (ind + 1));
+					} else {
+						ind++;
+					}
+				}
+				int xx = (i & 1);
+				ll res = 0;
+				for (int i = s.size() - 1 - xx; i >= 0; i--)
+					s += s[i];
+				for (int i = 0; i < s.size(); i++) {
+					res *= 10LL;
+					res += s[i] - '0';
+				}
+				return res;
+			}
+		}
+		return 0;
+	}
+
+	ll check(int i) {
+		ll ret = 1;
+		if (i == 1)
+			return 9;
+		if (i & 1) {
+			ret *= 10;
+			--i;
+			i /= 2;
+			ret *= 9;
+			i--;
+			ret *= pow(10, i);
+		} else {
+			i /= 2;
+			ret *= 9;
+			i--;
+			ret *= pow(10, i);
+		}
+		return ret;
+	}
+};
