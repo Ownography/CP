@@ -1,0 +1,110 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 800, MOD = 998244353, M = 1e6 + 2;
+int t, n, q, x, y, fr, to, a[N], b[N], comp[N], cmp, rnk[N];
+vector<vector<int> > g(N);
+vector<pair<double, pair<int, int> > > edges;
+int rep[N];
+double fres, cost[N][N];
+
+void DFS(int u, int clr) {
+	comp[u] = clr;
+	for (int i = 0; i < g[u].size(); i++) {
+		if (!comp[g[u][i]])
+			DFS(g[u][i], clr);
+	}
+}
+
+int findRep(int u) {
+	while (u != rep[u])
+		return rep[u] = findRep(rep[u]);
+	return u;
+}
+
+double calcDist(double xx1, double yy1, double xx2, double yy2) {
+	return sqrt((yy2 - yy1) * (yy2 - yy1) + (xx2 - xx1) * (xx2 - xx1));
+}
+
+int main() {
+	freopen("output.txt", "w", stdout);
+	scanf("%d", &t);
+	while (t--) {
+		g.clear();
+		cmp = 0;
+		edges.clear();
+		scanf("%d", &n);
+		for (int i = 0; i < n + 10; i++) {
+			comp[i] = 0;
+			rep[i] = i;
+			rnk[i] = 1;
+		}
+		g.resize(n + 10);
+		for (int i = 0; i < n; i++) {
+			scanf("%d%d", a + i, b + i);
+		}
+		scanf("%d", &q);
+		for (int i = 0; i < q; i++) {
+			scanf("%d%d", &fr, &to);
+			fr--, to--;
+			g[fr].push_back(to);
+			g[to].push_back(fr);
+		}
+		for (int i = 0; i < n; i++) {
+			if (!comp[i]) {
+				cmp++;
+				DFS(i, cmp);
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				cost[i][j] = 1e9;
+			}
+		}
+
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				double tcost = calcDist(a[i], b[i], a[j], b[j]);
+				cost[i][j] = min(cost[i][j], tcost);
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (cost[i][j] != 1e9) {
+					edges.push_back(make_pair(cost[i][j], make_pair(i, j)));
+				}
+			}
+		}
+		sort(edges.begin(), edges.end());
+		bool ys = false;
+		for (int i = 0; i < edges.size(); i++) {
+			double c = edges[i].first;
+			int u = edges[i].second.first;
+			int v = edges[i].second.second;
+			int cu = comp[u];
+			int cv = comp[v];
+			if (findRep(cu) != findRep(cv)) {
+				ys = true;
+				printf("%d %d\n", u + 1, v + 1);
+				if (rnk[cu] > rnk[cv]) {
+					rnk[cu] += rnk[cv];
+					rep[rep[cv]] = rep[cu];
+				} else {
+					rnk[cv] += rnk[cu];
+					rep[rep[cu]] = rep[cv];
+				}
+			} else {
+				continue;
+			}
+		}
+		if (!ys)
+			printf("No new highways need\n");
+		if (t)
+			puts("");
+	}
+
+	return 0;
+}
