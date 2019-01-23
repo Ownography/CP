@@ -1,3 +1,11 @@
+/* We use the current edges we have to connect the components, and use every component as a node, then we find the MST
+* using the currecnt new "nodes"
+*/
+
+
+
+
+
 #include<bits/stdc++.h>
 
 using namespace std;
