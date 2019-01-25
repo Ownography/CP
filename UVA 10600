@@ -1,0 +1,84 @@
+/* The idea is to first get the MST of the graph, then we try to remove an edge from the MST (iterate over all edges of MST)
+ * Each time we try to remove the edge, if the remaining graph is conntected, we can take the MST and minimize it
+ * with the 2nd minimum to get the 2nd minimum.
+ * */
+
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 105;
+int t, n, m, toIgnore, res1, res2, fr, to, cc, rep[N], rnk[N];
+vector<pair<int, pair<int, pair<int, int> > > > edges;
+vector<int> edgesTakenMST;
+
+void init() {
+	for (int i = 0; i < N; i++)
+		rep[i] = i, rnk[i] = 1;
+}
+
+int findRep(int u) {
+	if (u != rep[u])
+		return rep[u] = findRep(rep[u]);
+	return u;
+}
+
+int krus(int ignore) {
+	int ret = 0, cnt = 0;
+	for (int i = 0; i < edges.size(); i++) {
+		int cc = edges[i].first;
+		int ind = edges[i].second.first;
+		int fr = edges[i].second.second.first;
+		int to = edges[i].second.second.second;
+		int rep1 = findRep(fr);
+		int rep2 = findRep(to);
+		if (rep1 != rep2) {
+			if (ignore == -1)
+				edgesTakenMST.push_back(ind);
+			else if (ignore == ind)
+				continue;
+			ret += cc;
+			cnt++;
+			if (rnk[rep1] > rnk[rep2]) {
+				rep[rep2] = rep1;
+				rnk[rep1] += rnk[rep2];
+			} else {
+				rep[rep1] = rep2;
+				rnk[rep2] += rnk[rep1];
+			}
+		}
+	}
+	if (cnt == n - 1)
+		return ret;
+	else
+		return 1e9;
+}
+
+int main() {
+//	freopen("output.txt", "w", stdout);
+	scanf("%d", &t);
+	while (t--) {
+		edges.clear();
+		edgesTakenMST.clear();
+		scanf("%d%d", &n, &m);
+		for (int i = 0; i < m; i++) {
+			scanf("%d%d%d", &fr, &to, &cc);
+			edges.push_back(make_pair(cc, make_pair(i, make_pair(fr, to))));
+			edges.push_back(make_pair(cc, make_pair(i, make_pair(to, fr))));
+		}
+		sort(edges.begin(), edges.end());
+		init();
+		toIgnore = -1;
+		res1 = krus(toIgnore);
+		res2 = 1e9;
+		for (int i = 0; i < edgesTakenMST.size(); i++) {
+			init();
+			res2 = min(res2, krus(edgesTakenMST[i]));
+		}
+		printf("%d %d\n", res1, res2);
+	}
+	return 0;
+}
