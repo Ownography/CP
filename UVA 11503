@@ -1,0 +1,65 @@
+/* Straight forward DSU with rank heuristic for better complexity and to answer the queries.
+ * */
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 4e5 + 10;
+int t, n, cnt, rep[N], rnk[N];
+char a[50], b[50];
+string s;
+map<string, int> mp;
+
+void init() {
+	for (int i = 0; i < 3 * n; i++)
+		rep[i] = i, rnk[i] = 1;
+}
+
+int findRep(int u) {
+	if (u != rep[u])
+		return rep[u] = findRep(rep[u]);
+	return u;
+}
+
+int main() {
+//	freopen("output.txt", "w", stdout);
+	scanf("%d", &t);
+	while (t--) {
+		cnt = 1;
+		mp.clear();
+		scanf("%d", &n);
+		init();
+		for (int i = 0; i < n; i++) {
+			scanf("%s%s", &a, &b);
+			s = a;
+			if (!mp[s])
+				mp[s] = cnt++;
+			int fr = mp[s];
+			s = b;
+			if (!mp[s])
+				mp[s] = cnt++;
+			int to = mp[s];
+			if (findRep(fr) != findRep(to)) {
+				int rep1 = findRep(fr);
+				int rep2 = findRep(to);
+				if (rnk[rep1] > rnk[rep2]) {
+					rnk[rep1] += rnk[rep2];
+					rep[rep2] = rep1;
+					printf("%d\n", rnk[rep1]);
+				} else {
+					rnk[rep2] += rnk[rep1];
+					rep[rep1] = rep2;
+					printf("%d\n", rnk[rep2]);
+				}
+			} else {
+				findRep(fr);
+				printf("%d\n", rnk[rep[fr]]);
+			}
+
+		}
+	}
+	return 0;
+}
