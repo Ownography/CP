@@ -1,0 +1,68 @@
+/* Getting the MST means by definiton, making the graph connected by making the maximum cost edge, minimum, in this problem we
+ * can also disconnect the graph on multiple components (s - 1) components at most.
+ * so we get the max length edges from the MST and disconnect them
+ * */
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 1e3 + 10;
+int t, n, cnt, rep[N], rnk[N];
+int a[N], b[N];
+int s, p;
+map<string, int> mp;
+vector<vector<pair<int, double> > > g(N);
+vector<pair<double, pair<int, int> > > edges;
+vector<double> res;
+void init() {
+	for (int i = 0; i < N; i++)
+		rep[i] = i, rnk[i] = 1;
+}
+
+int findRep(int u) {
+	if (u != rep[u])
+		return rep[u] = findRep(rep[u]);
+	return u;
+}
+
+int main() {
+//	freopen("output.txt", "w", stdout);
+	scanf("%d", &t);
+	while (t--) {
+		g.clear();
+		g.resize(N);
+		edges.clear();
+		res.clear();
+		init();
+		scanf("%d%d", &s, &p);
+		for (int i = 0; i < p; i++) {
+			scanf("%d%d", a + i, b + i);
+		}
+		for (int i = 0; i < p; i++) {
+			for (int j = i + 1; j < p; j++) {
+				double dist = sqrt(
+						(a[i] - a[j]) * (a[i] - a[j])
+								+ (b[i] - b[j]) * (b[i] - b[j]));
+				g[i].push_back(make_pair(j, dist));
+				g[j].push_back(make_pair(i, dist));
+				edges.push_back(make_pair(dist, make_pair(i, j)));
+			}
+		}
+		sort(edges.begin(), edges.end());
+		for (int i = 0; i < edges.size(); i++) {
+			int fr = edges[i].second.first;
+			int to = edges[i].second.second;
+			double cc = edges[i].first;
+			if (findRep(fr) != findRep(to)) {
+				rep[rep[fr]] = rep[to];
+				res.push_back(cc);
+			}
+		}
+		printf("%.2lf\n",
+				res[res.size() - 1 - (min((int) res.size() - 1, s - 1))]);
+	}
+	return 0;
+}
