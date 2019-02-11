@@ -1,0 +1,238 @@
+/* The idea is to first make the graph with the edges we have a tree, with minimal cost,
+ * this can be done by sorting edges by cost,
+ * and checking if each edge is bridge
+ * if it is, we dont remove
+ * if it isnt we remove the edge
+ * then we make an MST to make the whole graph connected.
+ * */
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 1e2 + 10;
+int n, m, rep[N];
+string s;
+vector<string> b, d, k;
+vector<vector<int> > g(105);
+vector<pair<int, pair<int, int> > > toRem, edges;
+bool removed[N][N], vis[N], can;
+int findRep(int u) {
+	while (u != rep[u]) {
+		return rep[u] = findRep(rep[u]);
+	}
+	return rep[u];
+}
+
+void canRem(int u, int fr, int to) {
+	vis[u] = true;
+	if (u == to)
+		can = true;
+	for (int i = 0; i < g[u].size(); i++) {
+		if (removed[u][g[u][i]])
+			continue;
+		if (u == fr && g[u][i] == to)
+			continue;
+		if (u == to && g[u][i] == fr)
+			continue;
+		if (vis[g[u][i]])
+			continue;
+		canRem(g[u][i], fr, to);
+	}
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		cin >> s;
+		k.push_back(s);
+	}
+	for (int i = 0; i < n; i++) {
+		cin >> s;
+		b.push_back(s);
+	}
+	for (int i = 0; i < n; i++) {
+		cin >> s;
+		d.push_back(s);
+	}
+	for (int i = 0; i < k.size(); i++) {
+		for (int j = 0; j < k.size(); j++) {
+			if (k[i][j] == '1') {
+				g[i].push_back(j);
+			}
+		}
+	}
+	for (int i = 0; i < b.size(); i++) {
+		for (int j = 0; j < b.size(); j++) {
+			int cc;
+			if (b[i][j] >= 'A' && b[i][j] <= 'Z') {
+				cc = b[i][j] - 'A';
+			} else {
+				cc = b[i][j] - 'a';
+				cc += 26;
+			}
+			edges.push_back(make_pair(cc, make_pair(i, j)));
+		}
+	}
+	for (int i = 0; i < d.size(); i++) {
+		for (int j = i + 1; j < d.size(); j++) {
+			int cc;
+			if (k[i][j] == '0')
+				continue;
+			if (d[i][j] >= 'A' && d[i][j] <= 'Z') {
+				cc = d[i][j] - 'A';
+			} else {
+				cc = d[i][j] - 'a';
+				cc += 26;
+			}
+			toRem.push_back(make_pair(cc, make_pair(i, j)));
+		}
+	}
+	sort(toRem.begin(), toRem.end());
+	int ret = 0;
+	for (int i = 0; i < toRem.size(); i++) {
+		canRem(toRem[i].second.first, toRem[i].second.first,
+				toRem[i].second.second);
+		memset(vis, false, sizeof(vis));
+		if (can) {
+			can = false;
+			removed[toRem[i].second.first][toRem[i].second.second] =
+					removed[toRem[i].second.second][toRem[i].second.first] = 1;
+			ret += toRem[i].first;
+		}
+	}
+	for (int i = 0; i < n; i++) {
+		rep[i] = i;
+	}
+	for (int i = 0; i < toRem.size(); i++) {
+		int fr = toRem[i].second.first;
+		int to = toRem[i].second.second;
+		if (findRep(fr) != findRep(to)) {
+			rep[rep[fr]] = rep[to];
+		}
+	}
+	sort(edges.begin(), edges.end());
+	for (int i = 0; i < edges.size(); i++) {
+		int fr = edges[i].second.first;
+		int to = edges[i].second.second;
+		if (findRep(fr) != findRep(to)) {
+			ret += edges[i].first;
+			rep[rep[fr]] = rep[to];
+		}
+	}
+	cout << ret;
+	return 0;
+}
+
+//Submission code
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long int ll;
+
+const double PI = acos(-1);
+const int N = 1e3 + 10;
+int n, m, rep[N];
+string s;
+vector<string> b, d, k;
+vector<vector<int> > g(10000);
+vector<pair<int, pair<int, int> > > toRem, edges;
+bool removed[N][N], vis[N], can;
+
+class KingdomReorganization {
+public:
+	int findRep(int u) {
+		while (u != rep[u]) {
+			return rep[u] = findRep(rep[u]);
+		}
+		return rep[u];
+	}
+
+	void canRem(int u, int fr, int to) {
+		vis[u] = true;
+		if (u == to)
+			can = true;
+		for (int i = 0; i < g[u].size(); i++) {
+			if (removed[u][g[u][i]])
+				continue;
+			if (u == fr && g[u][i] == to)
+				continue;
+			if (u == to && g[u][i] == fr)
+				continue;
+			if (vis[g[u][i]])
+				continue;
+			canRem(g[u][i], fr, to);
+		}
+	}
+	int getCost(vector<string> k, vector<string> b, vector<string> d) {
+		for (int i = 0; i < k.size(); i++) {
+			for (int j = 0; j < k.size(); j++) {
+				if (k[i][j] == '1') {
+					g[i].push_back(j);
+				}
+			}
+		}
+		for (int i = 0; i < b.size(); i++) {
+			for (int j = 0; j < b.size(); j++) {
+				int cc;
+				if (b[i][j] >= 'A' && b[i][j] <= 'Z') {
+					cc = b[i][j] - 'A';
+				} else {
+					cc = b[i][j] - 'a';
+					cc += 26;
+				}
+				edges.push_back(make_pair(cc, make_pair(i, j)));
+			}
+		}
+		for (int i = 0; i < d.size(); i++) {
+			for (int j = i + 1; j < d.size(); j++) {
+				int cc;
+				if (k[i][j] == '0')
+					continue;
+				if (d[i][j] >= 'A' && d[i][j] <= 'Z') {
+					cc = d[i][j] - 'A';
+				} else {
+					cc = d[i][j] - 'a';
+					cc += 26;
+				}
+				toRem.push_back(make_pair(cc, make_pair(i, j)));
+			}
+		}
+		sort(toRem.begin(), toRem.end());
+		int ret = 0;
+		for (int i = 0; i < toRem.size(); i++) {
+			canRem(toRem[i].second.first, toRem[i].second.first,
+					toRem[i].second.second);
+			memset(vis, false, sizeof(vis));
+			if (can) {
+				can = false;
+				removed[toRem[i].second.first][toRem[i].second.second] =
+						removed[toRem[i].second.second][toRem[i].second.first] =
+								1;
+				ret += toRem[i].first;
+			}
+		}
+		for (int i = 0; i < n + 10; i++) {
+			rep[i] = i;
+		}
+		for (int i = 0; i < toRem.size(); i++) {
+			int fr = toRem[i].second.first;
+			int to = toRem[i].second.second;
+			if (findRep(fr) != findRep(to)) {
+				rep[rep[fr]] = rep[to];
+			}
+		}
+		sort(edges.begin(), edges.end());
+		for (int i = 0; i < edges.size(); i++) {
+			int fr = edges[i].second.first;
+			int to = edges[i].second.second;
+			if (findRep(fr) != findRep(to)) {
+				ret += edges[i].first;
+				rep[rep[fr]] = rep[to];
+			}
+		}
+		return ret;
+	}
+};
