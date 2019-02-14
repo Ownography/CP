@@ -1,0 +1,50 @@
+/* The idea is to simply create an MST from the graph, and see how much cost you saved.
+ * */
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 1e4 + 10;
+
+int n, t, m, fr, to, c, rep[N], res;
+vector<pair<int, pair<int, int> > > edges;
+
+int findRep(int u) {
+	while (u != rep[u]) {
+		return rep[u] = findRep(rep[u]);
+	}
+	return u;
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	scanf("%d", &t);
+	while (t--) {
+		edges.clear();
+		res = 0;
+		scanf("%d%d", &n, &m);
+		for (int i = 0; i < n + 10; i++) {
+			rep[i] = i;
+		}
+		for (int i = 0; i < m; i++) {
+			scanf("%d%d%d", &fr, &to, &c);
+			edges.push_back(make_pair(-c, make_pair(fr, to)));
+			edges.push_back(make_pair(-c, make_pair(to, fr)));
+			res += c;
+		}
+		sort(edges.begin(), edges.end());
+		for (int i = 0; i < edges.size(); i++) {
+			int rep1 = findRep(edges[i].second.first);
+			int rep2 = findRep(edges[i].second.second);
+			if (rep1 != rep2) {
+				rep[rep1] = rep2;
+				res += edges[i].first;
+			}
+		}
+		printf("%d\n", res);
+	}
+
+	return 0;
+}
