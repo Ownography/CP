@@ -1,0 +1,122 @@
+/* Bruteforce with MST
+ * */
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 1e4 + 10;
+
+int n, t, m, fr, to, c, rep[N], res, xx[N];
+vector<pair<int, pair<int, int> > > edges;
+vector<vector<int> > lst;
+vector<int> cur;
+
+int findRep(int u) {
+	while (rep[u] != u) {
+		return rep[u] = findRep(rep[u]);
+	}
+	return rep[u];
+}
+
+int main() {
+	freopen("input.txt", "r", stdin);
+	while (true) {
+		double fres = 1e9;
+		scanf("%d%d", &n, &m);
+		if (n == 0 && m == 0)
+			return 0;
+		edges.clear();
+		lst.clear();
+		for (int i = 0; i < n; i++)
+			scanf("%d", xx + i);
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				scanf("%d", &c);
+				if (c)
+					edges.push_back(make_pair(c, make_pair(i, j)));
+			}
+		}
+		sort(edges.begin(), edges.end());
+		for (int i = 0; i < (1 << n); i++) {
+			int Cost = 0;
+			int temp = i, cnt = 0;
+			while (temp > 0) {
+				if (temp & 1)
+					cnt++;
+				temp >>= 1;
+			}
+			if (cnt != m)
+				continue;
+			double div = 0;
+			for (int ii = 0; ii < n; ii++) {
+				if ((1 << ii) & i) {
+					div += xx[ii];
+				}
+			}
+
+			for (int i = 0; i < n + 5; i++)
+				rep[i] = i;
+			for (int ii = 0; ii < edges.size(); ii++) {
+				int fr = edges[ii].second.first;
+				int to = edges[ii].second.second;
+				int cc = edges[ii].first;
+				if (((1 << fr) & i) && ((1 << to) & i)) {
+					if (findRep(fr) != findRep(to)) {
+						Cost += cc;
+						rep[rep[fr]] = rep[to];
+					}
+				}
+			}
+			fres = min(fres, Cost / div);
+		}
+		for (int i = 0; i < (1 << n); i++) {
+			int Cost = 0;
+			int temp = i, cnt = 0;
+			while (temp > 0) {
+				if (temp & 1)
+					cnt++;
+				temp >>= 1;
+			}
+			if (cnt != m)
+				continue;
+			double div = 0;
+			for (int ii = 0; ii < n; ii++) {
+				if ((1 << ii) & i) {
+					div += xx[ii];
+				}
+			}
+			for (int i = 0; i < n + 5; i++)
+				rep[i] = i;
+			for (int ii = 0; ii < edges.size(); ii++) {
+				int fr = edges[ii].second.first;
+				int to = edges[ii].second.second;
+				int cc = edges[ii].first;
+				if (((1 << fr) & i) && ((1 << to) & i)) {
+					if (findRep(fr) != findRep(to)) {
+						Cost += cc;
+						rep[rep[fr]] = rep[to];
+					}
+				}
+			}
+			if (Cost / div == fres) {
+				for (int ii = 0; ii < n; ii++) {
+					if ((1 << ii) & i) {
+						cur.push_back(ii + 1);
+					}
+				}
+				lst.push_back(cur);
+				cur.clear();
+			}
+		}
+		sort(lst.begin(), lst.end());
+		for (int i = 0; i < m - 1; i++) {
+			printf("%d ", lst[0][i]);
+		}
+		printf("%d", lst[0][m - 1]);
+
+		puts("");
+	}
+	return 0;
+}
