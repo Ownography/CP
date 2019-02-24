@@ -1,0 +1,124 @@
+/* This problem is like saying we want to remove as many edges from a graph making it connected with least cost
+ * which can be easily done with MST
+ * */
+
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long int ll;
+const int N = 1e4 + 10;
+
+vector<string> v;
+vector<pair<ll, pair<int, int> > > edges;
+int n, rep[N], merg;
+ll inp[N][4];
+ll ret;
+
+//int findRep(int u) {
+//	while (rep[u] != u) {
+//		return rep[u] = findRep(rep[u]);
+//	}
+//	return rep[u];
+//}
+//
+//int main() {
+//	//
+//	n = 3;
+//	v.push_back("0,2,2");
+//	//
+//	for (int i = 0; i < N; i++)
+//		rep[i] = i;
+//	string s = "";
+//	for (int i = 0; i < v.size(); i++) {
+//		s += v[i];
+//	}
+//	cout << s << endl;
+//	int ind = 0, cur = 0, ind2 = 0;
+//	for (int i = 0; i < s.size(); i++) {
+//		if (s[i] == ' ') {
+//			ind++;
+//			ind2 = 0;
+//			continue;
+//		} else if (s[i] == ',') {
+//			ind2++;
+//			continue;
+//		}
+//		inp[ind][ind2] *= 10;
+//		inp[ind][ind2] += s[i] - '0';
+//
+//	}
+//	for (int i = 0; i < ind + 1; i++) {
+//		edges.push_back(make_pair(inp[i][2], make_pair(inp[i][0], inp[i][1])));
+//		edges.push_back(make_pair(inp[i][2], make_pair(inp[i][1], inp[i][0])));
+//	}
+//	sort(edges.begin(), edges.end());
+//	for (int i = 0; i < edges.size(); i++) {
+//		int fr = edges[i].second.first;
+//		int to = edges[i].second.second;
+//		ll c = edges[i].first;
+//		if (findRep(to) != findRep(fr)) {
+//			merg++;
+//			ret += c;
+//			rep[to] = rep[rep[fr]];
+//		}
+//	}
+//	if (merg + 1 != n)
+//		return printf("-1"), 0;
+//	cout << ret << endl;
+//	return 0;
+//}
+
+//dsadsa
+
+class TimeTravellingSalesman {
+public:
+	int findRep(int u) {
+		while (rep[u] != u) {
+			return rep[u] = findRep(rep[u]);
+		}
+		return rep[u];
+	}
+	ll determineCost(int n, vector<string> v) {
+		for (int i = 0; i < N; i++)
+			rep[i] = i;
+		string s = "";
+		for (int i = 0; i < v.size(); i++) {
+			s += v[i];
+		}
+		int ind = 0, ind2 = 0;
+		ll cur = 0;
+		for (int i = 0; i < s.size(); i++) {
+			if (s[i] == ' ') {
+				ind++;
+				ind2 = 0;
+				continue;
+			} else if (s[i] == ',') {
+				ind2++;
+				continue;
+			}
+			inp[ind][ind2] *= 10LL;
+			inp[ind][ind2] += s[i] - '0';
+
+		}
+		for (int i = 0; i < ind + 1; i++) {
+			edges.push_back(
+					make_pair(inp[i][2], make_pair(inp[i][0], inp[i][1])));
+			edges.push_back(
+					make_pair(inp[i][2], make_pair(inp[i][1], inp[i][0])));
+		}
+		sort(edges.begin(), edges.end());
+		for (int i = 0; i < edges.size(); i++) {
+			int fr = edges[i].second.first;
+			int to = edges[i].second.second;
+			ll c = edges[i].first;
+			if (findRep(to) != findRep(fr)) {
+				merg++;
+				ret += c;
+				rep[rep[to]] = rep[fr];
+			}
+		}
+		if (merg + 1 != n)
+			return -1;
+		return ret;
+	}
+};
