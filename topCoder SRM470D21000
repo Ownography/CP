@@ -1,0 +1,132 @@
+/* This is a lovely problem that can be solved when looking at the grid as a graph, and the maximum cost to connect
+ * this graph without making a cycle (Tree) can be found using MST on negative values.
+ * */
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long int ll;
+const int N = 55;
+
+vector<string> s;
+int mat[N][N];
+int dx[] = { 0, 0, 1, -1 };
+int dy[] = { 1, -1, 0, 0 }, ret;
+pair<int, int> rep[N][N];
+vector<pair<int, pair<pair<int, int>, pair<int, int> > > > edges;
+
+//pair<int, int> findRep(pair<int, int> node) {
+//	while (rep[node.first][node.second] != make_pair(node.first, node.second)) {
+//		return rep[node.first][node.second] = findRep(
+//				rep[node.first][node.second]);
+//	}
+//	return make_pair(node.first, node.second);
+//}
+//
+//bool isValid(int xx, int yy, int c, int r) {
+//	if (xx < 0 || yy < 0 || xx >= r || yy >= c)
+//		return false;
+//	return true;
+//}
+//
+//int main() {
+//	for (int i = 0; i < s.size(); i++) {
+//		for (int j = 0; j < s[i].size(); j++) {
+//			if (s[i][j] >= '0' && s[i][j] <= '9') {
+//				mat[i][j] = s[i][j] - '0';
+//			} else if (s[i][j] >= 'a' && s[i][j] <= 'z') {
+//				mat[i][j] = (s[i][j] - 'a') + 10;
+//			} else {
+//				mat[i][j] = (s[i][j] - 'A') + 36;
+//			}
+//		}
+//	}
+//	for (int i = 0; i < N; i++)
+//		for (int j = 0; j < N; j++)
+//			rep[i][j] = make_pair(i, j);
+//	for (int i = 0; i < s.size(); i++) {
+//		for (int j = 0; j < s[i].size(); j++) {
+//			for (int k = 0; k < 4; k++) {
+//				if (isValid(i + dx[k], j + dy[k], s[i].size(), s.size())) {
+//					edges.push_back(
+//							make_pair(-(mat[i][j] - mat[i + dx[k]][j + dy[k]]),
+//									make_pair(make_pair(i, j),
+//											make_pair(i + dx[k], j + dy[k]))));
+//				}
+//			}
+//		}
+//	}
+//	sort(edges.begin(), edges.end());
+//	for (int i = 0; i < edges.size(); i++) {
+//		pair<int, int> u1 = edges[i].second.first;
+//		pair<int, int> u2 = edges[i].second.second;
+//		if (findRep(u1) != findRep(u2)) {
+//			ret -= edges[i].first;
+//			rep[rep[u1.first][u1.second].first][rep[u1.first][u1.second].second] =
+//					rep[u2.first][u2.second];
+//		}
+//	}
+//	cout << ret;
+//	return 0;
+//}
+
+// Submission code
+
+class ActivateGame {
+public:
+	pair<int, int> findRep(pair<int, int> node) {
+		while (rep[node.first][node.second]
+				!= make_pair(node.first, node.second)) {
+			return rep[node.first][node.second] = findRep(
+					rep[node.first][node.second]);
+		}
+		return make_pair(node.first, node.second);
+	}
+	bool isValid(int xx, int yy, int c, int r) {
+		if (xx < 0 || yy < 0 || xx >= r || yy >= c)
+			return false;
+		return true;
+	}
+	int findMaxScore(vector<string> s) {
+		for (int i = 0; i < s.size(); i++) {
+			for (int j = 0; j < s[i].size(); j++) {
+				if (s[i][j] >= '0' && s[i][j] <= '9') {
+					mat[i][j] = s[i][j] - '0';
+				} else if (s[i][j] >= 'a' && s[i][j] <= 'z') {
+					mat[i][j] = (s[i][j] - 'a') + 10;
+				} else {
+					mat[i][j] = (s[i][j] - 'A') + 36;
+				}
+			}
+		}
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+				rep[i][j] = make_pair(i, j);
+		for (int i = 0; i < s.size(); i++) {
+			for (int j = 0; j < s[i].size(); j++) {
+				for (int k = 0; k < 4; k++) {
+					if (isValid(i + dx[k], j + dy[k], s[i].size(), s.size())) {
+						edges.push_back(
+								make_pair(
+										-(mat[i][j] - mat[i + dx[k]][j + dy[k]]),
+										make_pair(make_pair(i, j),
+												make_pair(i + dx[k],
+														j + dy[k]))));
+					}
+				}
+			}
+		}
+		sort(edges.begin(), edges.end());
+		for (int i = 0; i < edges.size(); i++) {
+			pair<int, int> u1 = edges[i].second.first;
+			pair<int, int> u2 = edges[i].second.second;
+			if (findRep(u1) != findRep(u2)) {
+				ret -= edges[i].first;
+				rep[rep[u1.first][u1.second].first][rep[u1.first][u1.second].second] =
+						rep[u2.first][u2.second];
+			}
+		}
+		return ret;
+	}
+
+}
+;
