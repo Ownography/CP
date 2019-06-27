@@ -7,7 +7,11 @@
  * segma(x) = segma(a) * segma(b) * segma(c)...
  * the rest is simple DP to know which number to pick or not
  * also you won't need e(i) to be anything other than 0 or 1 since otherwise it will not be a prime.
- * */
+ * 
+ *  
+ * I hope the explination was clear.
+ *
+ */
 #include <bits/stdc++.h>
 
 typedef long long int ll;
